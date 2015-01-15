@@ -1,9 +1,11 @@
 package io.dpwspoon.github.utils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.PagedIterable;
@@ -43,8 +45,7 @@ public final class RepoUtils {
 	}
 
 	public static void processRepositories(String user,
-			Predicate<GHRepository> predicate,
-			Consumer<GHRepository> consumer)
+			Predicate<GHRepository> predicate, Consumer<GHRepository> consumer)
 			throws IOException {
 		PagedIterable<GHRepository> repositories;
 		if (MY_GITHUB_USER_NAME.equalsIgnoreCase(user)) {
@@ -74,5 +75,19 @@ public final class RepoUtils {
 		};
 
 		processRepositories(user, predicate, consumer);
+	}
+
+	public static boolean hasFile(GHRepository repo, String path, String name)
+			throws IOException {
+		try {
+			for (GHContent content : repo.getDirectoryContent(path)) {
+				if (name.equalsIgnoreCase(content.getName())) {
+					return true;
+				}
+			}
+			return false;
+		} catch (FileNotFoundException e) {
+			return false;
+		}
 	}
 }
