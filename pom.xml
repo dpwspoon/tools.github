@@ -13,6 +13,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jgit.version>3.3.1.201403241930-r</jgit.version>
+		<jsch.agent.version>0.0.7</jsch.agent.version>
 	</properties>
 
 	<dependencies>
@@ -48,6 +49,26 @@
 					<artifactId>jsch</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch.agentproxy.jsch</artifactId>
+			<version>${jsch.agent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch.agentproxy.usocket-jna</artifactId>
+			<version>${jsch.agent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch.agentproxy.sshagent</artifactId>
+			<version>${jsch.agent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.jsch</artifactId>
+			<version>0.1.49_1</version>
 		</dependency>
 	</dependencies>
 

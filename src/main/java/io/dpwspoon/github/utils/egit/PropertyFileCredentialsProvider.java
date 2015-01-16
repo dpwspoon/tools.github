@@ -37,7 +37,6 @@ public class PropertyFileCredentialsProvider extends
 	}
 
 	public PropertyFileCredentialsProvider() {
-
 		super(USERNAME, PASSWORD);
 	}
 

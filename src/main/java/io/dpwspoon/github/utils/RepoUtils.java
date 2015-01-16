@@ -34,21 +34,11 @@ public final class RepoUtils {
 		}
 	};
 
-	public static final String MY_GITHUB_USER_NAME;
-	static {
-		try {
-			MY_GITHUB_USER_NAME = GitHubBuilder.fromCredentials().build()
-					.getMyself().getLogin();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	public static void processRepositories(String user,
 			Predicate<GHRepository> predicate, Consumer<GHRepository> consumer)
 			throws IOException {
 		PagedIterable<GHRepository> repositories;
-		if (MY_GITHUB_USER_NAME.equalsIgnoreCase(user)) {
+		if (GithubUtils.MY_GITHUB_USER_NAME.equalsIgnoreCase(user)) {
 			repositories = GitHubBuilder.fromCredentials().build().getMyself()
 					.listRepositories();
 		} else {
