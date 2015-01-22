@@ -100,13 +100,12 @@ public final class TravisCIUtils {
 		alreadyCompletedButPullRequestNotMerged.add("unpack-bower-dependency-maven-plugin");
 		alreadyCompletedButPullRequestNotMerged.add("snmp4j");
 		alreadyCompletedButPullRequestNotMerged.add("snmp4j.agent");
+		alreadyCompletedButPullRequestNotMerged.add("kaazing-client-javascript");
 
-
-
-		List<GHRepository> repos = DataReaper.getRepositoriesWithFile("/", "pom.xml");
+		List<GHRepository> repos = DataReaper.getRepositoriesWithFile("/", "Gruntfile.js");
 		for (GHRepository repo : repos) {
 			String mainRepoName = repo.getName();
-			if (!mainRepoName.contains("ios")) {
+			if (mainRepoName.contains("kaazing-")) {
 				if (!alreadyCompletedButPullRequestNotMerged.contains(mainRepoName) && !RepoUtils.hasFile(repo, "/", ".travis.yml")) {
 					GHRepository forkedRepo = repo.fork();
 					String branchName = "feature-travisci";
@@ -153,8 +152,10 @@ public final class TravisCIUtils {
 			NoFilepatternException, GitAPIException {
 		String travisFileName = ".travis.yml";
 		try (FileWriter travisWriter = new FileWriter(new File(dir, travisFileName))) {
-			travisWriter.write("language: Java\n" + "jdk:\n" + "  - oraclejdk7\n" + "  - openjdk7\n"
-					+ "script: mvn verify\n");
+			travisWriter.write("language: node_js\n" + "node_js:\n" + "  - \"0.10\\n" + "before_install:\n"
+					+ "  - npm install -g bower\n" + "  - npm install -g grunt-cli\n" + "script: grunt\n");
+//			travisWriter.write("language: Java\n" + "jdk:\n" + "  - oraclejdk7\n" + "  - openjdk7\n"
+//					+ "script: mvn verify\n");
 		}
 		localRepo.add().addFilepattern(travisFileName).call();
 
