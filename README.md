@@ -8,6 +8,8 @@ From top level run mvn clean install
 
 # Usage
 
+`java -jar tools.github-1.0.0-SNAPSHOT.jar -u USERNAME -f FILTER -a ACTION`
+
 Using the jar generated in target (tools.github-1.0.0-SNAPSHOT.jar)
 
 usage:  [-a <arg>] [-f <arg>] [-if <arg>] [-list <arg>] [-of <arg>] [-u <arg>]
