@@ -1,5 +1,5 @@
 # tools.github
-A repo that allows running Actions on a subset of github repos via Filters
+A repo that allows running automated Actions on a subset of github repos via Filters
 
 # To Build
 From top level run mvn clean install
