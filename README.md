@@ -1,7 +1,5 @@
 # tools.github
-Some utilities for working with github
-
-These originated out from common methods used to create utility programs.  They have since added a simple CLI.
+A repo that allows running Actions on a subset of github repos via Filters
 
 # To Build
 From top level run mvn clean install
