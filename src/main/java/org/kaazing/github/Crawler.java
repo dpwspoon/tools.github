@@ -23,8 +23,6 @@ public class Crawler {
     private final static String CMD_OPTION_ACTION = "action";
     private final static String CMD_OPTION_USER = "user";
     private final static String CMD_OPTION_LIST = "help";
-    private final static String CMD_OPTION_INPUT_FILE = "input-file";
-    private final static String CMD_OPTION_OUTPUT_FILE = "output-file";
     private final String user;
     private final Predicate<GHRepository> filters;
     private final Action actions;
@@ -41,8 +39,6 @@ public class Crawler {
                 new Options().addOption("f", CMD_OPTION_FILTER, true, "filter to apply in search")
                         .addOption("a", CMD_OPTION_ACTION, true, "action to do when found")
                         .addOption("u", CMD_OPTION_USER, true, "user/organization to apply filter to")
-                        .addOption("if", CMD_OPTION_INPUT_FILE, true, "input file if needed by action")
-                        .addOption("of", CMD_OPTION_OUTPUT_FILE, true, "output file if needed by action")
                         .addOption("list", CMD_OPTION_LIST, true, "list (actions) or (options)");
 
         try {
