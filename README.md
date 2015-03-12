@@ -32,15 +32,24 @@ java -jar target/tools.github-1.0.0-SNAPSHOT.jar -u dpwspoon -f hasFile\(/,.trav
 
 # List of Filters
 all                 		    Matches all repos
+
 private		                    Matches private repos
+
 hasFile(path,file-name)		    filters repositories that has file
+
 public		                    Matches public repos
+
 byName(name)		            gets a repo matching the name
 
+
 # List of Actions
+
 print-names		                prints the name of the repo
+
 addTeam(organization,team)		Adds a team from an organization to a repository
+
 clone(directory)		        clones the repo to a directory/name-of-repo
+
 delete		                    deletes the repo
 
 # NOTES
