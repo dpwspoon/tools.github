@@ -2,7 +2,9 @@ package org.kaazing.github;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -128,12 +130,11 @@ public abstract class Filter extends SubCommand implements Predicate<GHRepositor
         
         @Override
         public boolean test(GHRepository t) {
-            String[] args = getArgs();
-            String name = args[0];
-            if(name == null){
+            List<String> names = Arrays.asList(getArgs());
+            if(names.isEmpty()){
                 throw new RuntimeException("Filter by name requires non null arg");
             }
-            if(t.getName().equalsIgnoreCase(name)){
+            if(names.contains(t.getName())){
                 return true;
             }
             return false;

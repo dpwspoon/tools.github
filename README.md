@@ -10,6 +10,13 @@ From top level run mvn clean install
 
 Using the jar generated in target (tools.github-1.0.0-SNAPSHOT.jar)
 
+Place your credentials in ~/.github as 
+
+```
+login=<username>
+password=<password>
+```
+
 usage:  [-a <arg>] [-f <arg>] [-if <arg>] [-list <arg>] [-of <arg>] [-u <arg>]
  -a,--action <arg>         action to do when found
  -f,--filter <arg>         filter to apply in search
@@ -35,7 +42,7 @@ all                 		    Matches all repos
 private		                    Matches private repos
 hasFile(path,file-name)		    filters repositories that has file
 public		                    Matches public repos
-byName(name)		            gets a repo matching the name
+byName(name, name2 etc)	        gets a repo matching the name
 
 # List of Actions
 print-names		                prints the name of the repo
