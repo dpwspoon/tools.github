@@ -51,6 +51,8 @@ print-names:	                prints the name of the repo
 addTeam(organization,team):	    Adds a team from an organization to a repository
 clone(directory):               clones the repo to a directory/name-of-repo
 delete:                         deletes the repo
+listOpenPullRequests            lists open pull requests
+listOpenIssues                  lists open issues
 ```
 # NOTES
 Mileage may vary.  Most of these have not been fully tested yet.  Also, the lib is best used to write your own Java Program

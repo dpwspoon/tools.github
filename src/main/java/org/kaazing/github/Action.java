@@ -209,12 +209,12 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
 
         @Override
         public String getName() {
-            return "listOpenPullRequests";
+            return "listOpenIssuess";
         }
 
         @Override
         public String getDescription() {
-            return "lists open pull requests";
+            return "lists open issues";
         }
 
         @Override
