@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>tools.github</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>develop-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>tools.github</name>
 

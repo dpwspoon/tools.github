@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHPullRequest;
@@ -195,31 +194,4 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
         }
     };
 
-    public static Action LIST_OPEN_ISSUES = new Action() {
-
-        @Override
-        public void accept(GHRepository t) {
-            PagedIterable<GHIssue> open = t.listIssues(GHIssueState.OPEN);
-            PagedIterator<GHIssue> iter = open.iterator();
-            while (iter.hasNext()) {
-                GHIssue next = iter.next();
-                System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
-            }
-        }
-
-        @Override
-        public String getName() {
-            return "listOpenIssuess";
-        }
-
-        @Override
-        public String getDescription() {
-            return "lists open issues";
-        }
-
-        @Override
-        public String listArgs() {
-            return "";
-        }
-    };
 }
