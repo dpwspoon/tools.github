@@ -16,7 +16,7 @@ public class DailyEmail {
 	private List<GHIssue> pullRequests         = new ArrayList<GHIssue>();
 	private List<GHIssue> updatedOpenIssues    = new ArrayList<GHIssue>();
 	private List<GHIssue> backlogOpenIssues = new ArrayList<GHIssue>();
-	private List<GHIssue> newlyCloseIssues     = new ArrayList<GHIssue>();
+	private List<GHIssue> newlyClosedIssues     = new ArrayList<GHIssue>();
 	//private List<GHIssue> newlyFiledBugs       = new ArrayList<GHIssue>();
 	
 	
@@ -45,12 +45,6 @@ public class DailyEmail {
     		List<GHIssue> temp = repo.getIssues(GHIssueState.OPEN);
     		for (GHIssue issue : temp) {
     			
-    			// first add user if does not exist
-    			GHUser user = issue.getAssignee();
-    			if (user != null && !users.contains(user))
-    				users.add(user);
-    			
-    			// filter issues
     			if (issue.isPullRequest())
     				pullRequests.add(issue);
     			else {
@@ -67,19 +61,36 @@ public class DailyEmail {
     		
     		temp = repo.getIssues(GHIssueState.CLOSED);
     		for (GHIssue issue : temp) {
-    			// add user if doesnt exist
-    			GHUser user = issue.getAssignee();
-    			if (user != null && !users.contains(user))
-    				users.add(user);
-    			
-    			// filter issues
+
     			FilterIssues filter = FilterIssues.CLOSED_WITHIN_DAYS;
     			String[] args = {"1"};
 				filter.setArgs(args);
     			if (!issue.isPullRequest() && filter.test(issue))
-    				newlyCloseIssues.add(issue);
+    				newlyClosedIssues.add(issue);
     		}
-    		
+    	}
+    	
+    	// gather and sort users with activity
+    	for (GHIssue issue : pullRequests) {
+    		GHUser user = issue.getAssignee();
+			if (user != null && !users.contains(user))
+				users.add(user);
+    	}
+    	
+    	for (GHIssue issue : updatedOpenIssues) {
+    		GHUser user = issue.getAssignee();
+			if (user != null && !users.contains(user))
+				users.add(user);
+    	}
+    	for (GHIssue issue : backlogOpenIssues) {
+    		GHUser user = issue.getAssignee();
+			if (user != null && !users.contains(user))
+				users.add(user);
+    	}
+    	for (GHIssue issue : newlyClosedIssues) {
+    		GHUser user = issue.getAssignee();
+			if (user != null && !users.contains(user))
+				users.add(user);
     	}
     	
     	Collections.sort(users, new Comparator<GHUser>() {
@@ -88,7 +99,6 @@ public class DailyEmail {
 			public int compare(GHUser o1, GHUser o2) {
 				return o1.getLogin().compareTo(o2.getLogin());
 			}
-    		
     	});  	
     }
     
@@ -154,7 +164,7 @@ public class DailyEmail {
     	
     	userText += "\n\tISSUES CLOSED RECENTLY:\n";
 		htmlText += "\t<li>Issues Closed Recently\n\t\t<ul>\n";
-    	for (GHIssue issue : newlyCloseIssues) {
+    	for (GHIssue issue : newlyClosedIssues) {
     		if (user.equals(issue.getAssignee())) {
     			userText += "\t\t" + plainTextForIssue(issue) + "\n";
     			htmlText += "\t\t\t<li>"+ htmlTextForIssue(issue) + "</li>\n";
@@ -201,7 +211,7 @@ public class DailyEmail {
 
     	userText += "\n\tISSUES CLOSED RECENTLY:\n";
 		htmlText += "\t<li>Issues Closed Recently\n\t\t<ul>\n";
-    	for (GHIssue issue : newlyCloseIssues) {
+    	for (GHIssue issue : newlyClosedIssues) {
     		if (null == issue.getAssignee()) {
     			userText += "\t\t" + plainTextForIssue(issue) + "\n";
     			htmlText += "\t\t\t<li>"+ htmlTextForIssue(issue) + "</li>\n";
