@@ -2,18 +2,26 @@ package org.kaazing.github;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHTeam;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.PagedIterable;
 import org.kohsuke.github.PagedIterator;
@@ -26,6 +34,11 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
         actionsByName.put(CLONE.getName(), CLONE);
         actionsByName.put(ADD_TEAM_TO_REPO.getName(), ADD_TEAM_TO_REPO);
         actionsByName.put(DELETE.getName(), DELETE);
+        actionsByName.put(LIST_ISSUES_CLOSED_WITHIN_DAY.getName(), LIST_ISSUES_CLOSED_WITHIN_DAY);
+        actionsByName.put(LIST_ISSUES_UPDATED_WITHIN_DAY.getName(), LIST_ISSUES_UPDATED_WITHIN_DAY);
+        actionsByName.put(LIST_OPEN_PULL_REQUESTS.getName(), LIST_OPEN_PULL_REQUESTS);
+        actionsByName.put(LIST_BUGS_NOT_ASSIGNED.getName(), LIST_BUGS_NOT_ASSIGNED);
+        actionsByName.put(LIST_ISSUES_BY_MILESTONE.getName(), LIST_ISSUES_BY_MILESTONE);
         return actionsByName;
     }
 
@@ -59,7 +72,11 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
             PagedIterator<GHPullRequest> iter = open.iterator();
             while (iter.hasNext()) {
                 GHPullRequest next = iter.next();
-                System.out.println(t.getName() + "#" + next.getNumber() + " -- " + next.getTitle());
+                GHUser user = next.getAssignee();
+                if (user != null)
+                	System.out.println(t.getName() + "#" + next.getNumber() + " -- " + next.getTitle() + " -- " + user.getLogin());
+                else
+                	System.out.println(t.getName() + "#" + next.getNumber() + " -- " + next.getTitle() + " -- " + "NO ASSIGNED USER");
             }
         }
 
@@ -136,7 +153,7 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
                 for (int trys = 0; true; trys++) {
                     try {
                         Git.cloneRepository().setCredentialsProvider(credentialsProvider).setDirectory(directory)
-                                .setURI(r.getUrl()).call();
+                                .setURI(r.getUrl().toString()).call();
                         break;
                     } catch (TransportException e) {
                         // sporadic failure
@@ -194,4 +211,168 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
         }
     };
 
+    public static Action LIST_ISSUES_CLOSED_WITHIN_DAY = new Action() {
+
+        @Override
+        public void accept(GHRepository t) {
+        	List<GHIssue> closed = null;
+        	try {
+        		closed = t.getIssues(GHIssueState.CLOSED);
+        	} catch (IOException e) {
+        		throw new RuntimeException(e);
+        	}
+
+            Iterator<GHIssue> iter = closed.iterator();
+            while (iter.hasNext()) {
+                GHIssue next = iter.next();
+                FilterIssues filter = FilterIssues.CLOSED_WITHIN_DAYS;
+                String[] args = {"1"};
+                filter.setArgs(args);
+                if (filter.test(next))
+                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+            }
+        }
+
+		@Override
+		public String getName() {
+			return "list-issues-recently-closed";
+		}
+
+		@Override
+		public String getDescription() {
+			return "get all recently closed issues";
+		}
+
+		@Override
+		public String listArgs() {
+			return "";
+		}
+
+    };
+    
+    public static Action LIST_ISSUES_UPDATED_WITHIN_DAY = new Action() {
+
+        @Override
+        public void accept(GHRepository t) {
+        	List<GHIssue> closed = null;
+        	try {
+        		closed = t.getIssues(GHIssueState.OPEN);
+        	} catch (IOException e) {
+        		throw new RuntimeException(e);
+        	}
+
+            Iterator<GHIssue> iter = closed.iterator();
+            while (iter.hasNext()) {
+                GHIssue next = iter.next();
+                FilterIssues filter = FilterIssues.UPDATED_WITHIN_DAYS;
+                String[] args = {"1"};
+                filter.setArgs(args);
+                if (filter.test(next))
+                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+            }
+        }
+
+		@Override
+		public String getName() {
+			// TODO Auto-generated method stub
+			return "list-issues-recently-updated";
+		}
+
+		@Override
+		public String getDescription() {
+			// TODO Auto-generated method stub
+			return "get all recently updated issues";
+		}
+
+		@Override
+		public String listArgs() {
+			return "";
+		}
+
+    };
+    
+    public static Action LIST_BUGS_NOT_ASSIGNED = new Action() {
+
+        @Override
+        public void accept(GHRepository t) {
+        	List<GHIssue> closed = null;
+        	try {
+        		closed = t.getIssues(GHIssueState.OPEN);
+        	} catch (IOException e) {
+        		throw new RuntimeException(e);
+        	}
+
+            Iterator<GHIssue> iter = closed.iterator();
+            while (iter.hasNext()) {
+                GHIssue next = iter.next();
+                FilterIssues filters = FilterIssues.HAS_LABEL;
+                String[] args = {"bug"};
+                filters.setArgs(args);
+                FilterIssues filter = FilterIssues.HAS_ASSIGNEE;
+                filters.and(filter);
+                if (filters.test(next))
+                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+            }
+        }
+
+		@Override
+		public String getName() {
+			return "list-bugs-not-assigned";
+		}
+
+		@Override
+		public String getDescription() {
+			return "get all bugs not assigned";
+		}
+
+		@Override
+		public String listArgs() {
+			return "";
+		}
+
+    };
+    
+    public static Action LIST_ISSUES_BY_MILESTONE = new Action() {
+
+        @Override
+        public void accept(GHRepository t) {
+            
+        	List<GHIssue> closed = null;
+        	try {
+        		closed = t.getIssues(GHIssueState.OPEN);
+        	} catch (IOException e) {
+        		throw new RuntimeException(e);
+        	}
+
+            Iterator<GHIssue> iter = closed.iterator();
+            while (iter.hasNext()) {
+                GHIssue next = iter.next();
+                FilterIssues filter = FilterIssues.BY_MILESTONE;
+                filter.setArgs(getArgs());
+                if (filter.test(next))
+                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+            }
+        }
+
+		@Override
+		public String getName() {
+			// TODO Auto-generated method stub
+			return "list-issues-by-milestone";
+		}
+
+		@Override
+		public String getDescription() {
+			// TODO Auto-generated method stub
+			return "get all recently closed issues";
+		}
+
+		@Override
+		public String listArgs() {
+			// TODO Auto-generated method stub
+			return "(milestone)";
+		}
+
+    };
+    
+    
 }
