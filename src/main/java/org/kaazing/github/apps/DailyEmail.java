@@ -37,8 +37,8 @@ public class DailyEmail {
     	
     	List<GHRepository> repositories;
     	repositories = GitHub.connect().getOrganization("kaazing").listRepositories().asList();
-    	//repositories.addAll(GitHub.connect().getOrganization("kaazing-private").listRepositories().asList());
-    	//repositories.addAll(GitHub.connect().getOrganization("k3po").listRepositories().asList());
+    	repositories.addAll(GitHub.connect().getOrganization("kaazing-private").listRepositories().asList());
+    	repositories.addAll(GitHub.connect().getOrganization("k3po").listRepositories().asList());
     	
     	// Get all open pull requests, get open issues, get issues closed w/i day, get issues updated within day
     	for (GHRepository repo : repositories) {
