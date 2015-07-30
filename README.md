@@ -85,9 +85,9 @@ BY_NAME								gets issue matching the name
 # Apps
 ### DailyEmail.java
 
-`
+```
 cd target && java -cp tools.github-develop-SNAPSHOT.jar org.kaazing.github.apps.DailyEmail && cd ..
-`
+```
 
 Compiles and outputs both plain text (command line) and html (out_email.html) of users and key issues.
 Currently the app is programmed to search for the following by user:
