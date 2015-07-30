@@ -1,16 +1,20 @@
 package org.kaazing.github;
 
+import static org.kaazing.github.FilterIssues.BY_MILESTONE;
+import static org.kaazing.github.FilterIssues.CLOSED_WITHIN_DAYS;
+import static org.kaazing.github.FilterIssues.HAS_ASSIGNEE;
+import static org.kaazing.github.FilterIssues.HAS_LABEL;
+import static org.kaazing.github.FilterIssues.UPDATED_WITHIN_DAYS;
+import static org.kohsuke.github.GHIssueState.CLOSED;
+import static org.kohsuke.github.GHIssueState.OPEN;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -74,9 +78,11 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
                 GHPullRequest next = iter.next();
                 GHUser user = next.getAssignee();
                 if (user != null)
-                	System.out.println(t.getName() + "#" + next.getNumber() + " -- " + next.getTitle() + " -- " + user.getLogin());
+                    System.out
+                            .println(t.getName() + "#" + next.getNumber() + " -- " + next.getTitle() + " -- " + user.getLogin());
                 else
-                	System.out.println(t.getName() + "#" + next.getNumber() + " -- " + next.getTitle() + " -- " + "NO ASSIGNED USER");
+                    System.out.println(
+                            t.getName() + "#" + next.getNumber() + " -- " + next.getTitle() + " -- " + "NO ASSIGNED USER");
             }
         }
 
@@ -183,9 +189,9 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
             return "(directory)";
         }
     };
-    
+
     public static Action DELETE = new Action() {
-        
+
         @Override
         public void accept(GHRepository t) {
             try {
@@ -194,17 +200,17 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
                 throw new RuntimeException(e);
             }
         }
-        
+
         @Override
         public String listArgs() {
             return "";
         }
-        
+
         @Override
         public String getName() {
             return "delete";
         }
-        
+
         @Override
         public String getDescription() {
             return "deletes the repo";
@@ -215,164 +221,163 @@ public abstract class Action extends SubCommand implements Consumer<GHRepository
 
         @Override
         public void accept(GHRepository t) {
-        	List<GHIssue> closed = null;
-        	try {
-        		closed = t.getIssues(GHIssueState.CLOSED);
-        	} catch (IOException e) {
-        		throw new RuntimeException(e);
-        	}
+            List<GHIssue> closed = null;
+            try {
+                closed = t.getIssues(CLOSED);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
             Iterator<GHIssue> iter = closed.iterator();
             while (iter.hasNext()) {
                 GHIssue next = iter.next();
-                FilterIssues filter = FilterIssues.CLOSED_WITHIN_DAYS;
+                FilterIssues filter = CLOSED_WITHIN_DAYS;
                 String[] args = {"1"};
                 filter.setArgs(args);
                 if (filter.test(next))
-                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+                    System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
             }
         }
 
-		@Override
-		public String getName() {
-			return "list-issues-recently-closed";
-		}
+        @Override
+        public String getName() {
+            return "list-issues-recently-closed";
+        }
 
-		@Override
-		public String getDescription() {
-			return "get all recently closed issues";
-		}
+        @Override
+        public String getDescription() {
+            return "get all recently closed issues";
+        }
 
-		@Override
-		public String listArgs() {
-			return "";
-		}
+        @Override
+        public String listArgs() {
+            return "";
+        }
 
     };
-    
+
     public static Action LIST_ISSUES_UPDATED_WITHIN_DAY = new Action() {
 
         @Override
         public void accept(GHRepository t) {
-        	List<GHIssue> closed = null;
-        	try {
-        		closed = t.getIssues(GHIssueState.OPEN);
-        	} catch (IOException e) {
-        		throw new RuntimeException(e);
-        	}
+            List<GHIssue> closed = null;
+            try {
+                closed = t.getIssues(OPEN);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
             Iterator<GHIssue> iter = closed.iterator();
             while (iter.hasNext()) {
                 GHIssue next = iter.next();
-                FilterIssues filter = FilterIssues.UPDATED_WITHIN_DAYS;
+                FilterIssues filter = UPDATED_WITHIN_DAYS;
                 String[] args = {"1"};
                 filter.setArgs(args);
                 if (filter.test(next))
-                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+                    System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
             }
         }
 
-		@Override
-		public String getName() {
-			// TODO Auto-generated method stub
-			return "list-issues-recently-updated";
-		}
+        @Override
+        public String getName() {
+            // TODO Auto-generated method stub
+            return "list-issues-recently-updated";
+        }
 
-		@Override
-		public String getDescription() {
-			// TODO Auto-generated method stub
-			return "get all recently updated issues";
-		}
+        @Override
+        public String getDescription() {
+            // TODO Auto-generated method stub
+            return "get all recently updated issues";
+        }
 
-		@Override
-		public String listArgs() {
-			return "";
-		}
+        @Override
+        public String listArgs() {
+            return "";
+        }
 
     };
-    
+
     public static Action LIST_BUGS_NOT_ASSIGNED = new Action() {
 
         @Override
         public void accept(GHRepository t) {
-        	List<GHIssue> closed = null;
-        	try {
-        		closed = t.getIssues(GHIssueState.OPEN);
-        	} catch (IOException e) {
-        		throw new RuntimeException(e);
-        	}
+            List<GHIssue> closed = null;
+            try {
+                closed = t.getIssues(OPEN);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
             Iterator<GHIssue> iter = closed.iterator();
             while (iter.hasNext()) {
                 GHIssue next = iter.next();
-                FilterIssues filters = FilterIssues.HAS_LABEL;
+                FilterIssues filters = HAS_LABEL;
                 String[] args = {"bug"};
                 filters.setArgs(args);
-                FilterIssues filter = FilterIssues.HAS_ASSIGNEE;
+                FilterIssues filter = HAS_ASSIGNEE;
                 filters.and(filter);
                 if (filters.test(next))
-                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+                    System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
             }
         }
 
-		@Override
-		public String getName() {
-			return "list-bugs-not-assigned";
-		}
+        @Override
+        public String getName() {
+            return "list-bugs-not-assigned";
+        }
 
-		@Override
-		public String getDescription() {
-			return "get all bugs not assigned";
-		}
+        @Override
+        public String getDescription() {
+            return "get all bugs not assigned";
+        }
 
-		@Override
-		public String listArgs() {
-			return "";
-		}
+        @Override
+        public String listArgs() {
+            return "";
+        }
 
     };
-    
+
     public static Action LIST_ISSUES_BY_MILESTONE = new Action() {
 
         @Override
         public void accept(GHRepository t) {
-            
-        	List<GHIssue> closed = null;
-        	try {
-        		closed = t.getIssues(GHIssueState.OPEN);
-        	} catch (IOException e) {
-        		throw new RuntimeException(e);
-        	}
+
+            List<GHIssue> closed = null;
+            try {
+                closed = t.getIssues(OPEN);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
             Iterator<GHIssue> iter = closed.iterator();
             while (iter.hasNext()) {
                 GHIssue next = iter.next();
-                FilterIssues filter = FilterIssues.BY_MILESTONE;
+                FilterIssues filter = BY_MILESTONE;
                 filter.setArgs(getArgs());
                 if (filter.test(next))
-                	System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
+                    System.out.println(t.getFullName() + "#" + next.getNumber() + " -- " + next.getTitle());
             }
         }
 
-		@Override
-		public String getName() {
-			// TODO Auto-generated method stub
-			return "list-issues-by-milestone";
-		}
+        @Override
+        public String getName() {
+            // TODO Auto-generated method stub
+            return "list-issues-by-milestone";
+        }
 
-		@Override
-		public String getDescription() {
-			// TODO Auto-generated method stub
-			return "get all recently closed issues";
-		}
+        @Override
+        public String getDescription() {
+            // TODO Auto-generated method stub
+            return "get all recently closed issues";
+        }
 
-		@Override
-		public String listArgs() {
-			// TODO Auto-generated method stub
-			return "(milestone)";
-		}
+        @Override
+        public String listArgs() {
+            // TODO Auto-generated method stub
+            return "(milestone)";
+        }
 
     };
-    
-    
+
 }
