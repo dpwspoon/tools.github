@@ -3,6 +3,7 @@ package org.kaazing.github.apps;
 import org.kaazing.github.*;
 import org.kohsuke.github.*;
 
+import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -12,12 +13,13 @@ import java.util.*;
 public class DailyEmail {
 	private String htmlText  = "";
 	private String plainText = "";
-	private List<GHUser>  users                = new ArrayList<GHUser>();
-	private List<GHIssue> pullRequests         = new ArrayList<GHIssue>();
-	private List<GHIssue> updatedOpenIssues    = new ArrayList<GHIssue>();
+	private List<GHUser>  users             = new ArrayList<GHUser>();
+	private List<GHIssue> pullRequests      = new ArrayList<GHIssue>();
+	private List<GHIssue> updatedOpenIssues = new ArrayList<GHIssue>();
 	private List<GHIssue> backlogOpenIssues = new ArrayList<GHIssue>();
-	private List<GHIssue> newlyClosedIssues     = new ArrayList<GHIssue>();
-	//private List<GHIssue> newlyFiledBugs       = new ArrayList<GHIssue>();
+	private List<GHIssue> newlyClosedIssues = new ArrayList<GHIssue>();
+	private List<GHIssue> escalations       = new ArrayList<GHIssue>();
+	//private List<GHIssue> newlyFiledBugs    = new ArrayList<GHIssue>();
 	
 	
     public static void main(String... args) throws Exception {
@@ -48,13 +50,22 @@ public class DailyEmail {
     			if (issue.isPullRequest())
     				pullRequests.add(issue);
     			else {
-    				FilterIssues filter = FilterIssues.UPDATED_WITHIN_DAYS;
-    				String[] args = {"1"};
+    				FilterIssues filter = FilterIssues.HAS_LABEL;
+    				String[] args = {"escalation"};
     				filter.setArgs(args);
-    				if (filter.test(issue))
-    					updatedOpenIssues.add(issue);
-    				else if (issue.getMilestone() != null)
-    					backlogOpenIssues.add(issue);
+    				
+    				if (filter.test(issue)) {
+    					escalations.add(issue);
+    				} else {
+    					filter = FilterIssues.UPDATED_WITHIN_DAYS;
+    					String[] args2 = {"1"};
+    					filter.setArgs(args2);
+    					if (filter.test(issue))
+    						updatedOpenIssues.add(issue);
+    					else if (issue.getMilestone() != null)
+    						backlogOpenIssues.add(issue);
+    				}
+    				
     			}
     			
     		}
@@ -107,7 +118,10 @@ public class DailyEmail {
     // null argument will output ALL Users
     // string will only output matching user logins
     private void compileMessage(String forUserLogin) throws IOException {
-    	// Header    	
+    	// Header    
+    	
+    	plainText += getEscalationsText();
+    	
     	plainText += getNoAssigneeText();
 
     	for (GHUser user : users) {
@@ -118,6 +132,26 @@ public class DailyEmail {
         		plainText += getUserText(user);
         	}
     	}
+    	
+    }
+    
+    private String getEscalationsText() {
+    	String escalationText = "\nESCALATIONS:\n";
+    	htmlText += "\n<h4>Escalations</h4>\n";
+    	
+    	boolean addedSomething = false;
+    	
+		htmlText += "<ul>\n";
+		for (GHIssue issue : escalations) {
+    		escalationText += "\t\t" + plainTextForIssue(issue) + "\n";
+    		htmlText += "\t<li>"+ htmlTextForIssue(issue) + "</li>\n";
+    		addedSomething = true;
+    	}
+    	htmlText += "</ul>\n";
+    	
+    	if (addedSomething)
+    		return escalationText;
+    	return "";
     	
     }
     
@@ -233,7 +267,7 @@ public class DailyEmail {
     	html += "<a href=\"" + issue.getHtmlUrl() + "\">  #" + issue.getNumber() + " " + issue.getTitle() + " </a>";
     	try {
 			for (GHLabel label : issue.getLabels()) {
-				html += "<span style=\"background-color: #" + label.getColor() + "; color: white; padding: 2px 2px; border-radius: 2px 2px 2px 2px\">" + label.getName() + "</span> ";
+				html += "<span style=\"background-color: #" + label.getColor() + "; color: " + colorForBackground(label.getColor()) + "; padding: 2px 2px; border-radius: 2px 2px 2px 2px\">" + label.getName() + "</span> ";
 			}
 		} catch (IOException e) {
 			
@@ -267,5 +301,21 @@ public class DailyEmail {
     	PrintStream out = new PrintStream("out_email.html");
     	out.println(htmlText);
     	out.close();
+    }
+    
+    // Helper to determine black or white text on labels
+    private String colorForBackground(String hex) {
+    	// convert hex string to int
+    	int rgb = Integer.parseInt(hex, 16);
+
+    	Color c = new Color(rgb);
+
+    	double brightness = 0.299*c.getRed() + 0.587*c.getGreen() + 0.114*c.getBlue();
+
+    	if (brightness > 200) {
+    		return "black";
+    	} else {
+    		return "white";
+    	}
     }
 }
